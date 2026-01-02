@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title + ' - BookPublish' : 'BookPublish' %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Set theme on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <a href="/">
+                    <i class="fas fa-book"></i>
+                    <span>BookPublish</span>
+                </a>
+            </div>
+            
+            <div class="nav-links">
+                <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+                    <a href="/homepage" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    <a href="/createbook" class="nav-link">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Publish Book</span>
+                    </a>
+                    <div class="nav-dropdown">
+                        <button class="nav-link" style="background-color: rgb(137, 43, 226);">
+                            <img src="<%= currentUser.profilePicture || '/uploads/default-avatar.png' %>" alt="Profile" class="profile-icon">
+                            <span><%= currentUser.username %></span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="/userprofile">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </a>
+                            <a href="#" onclick="toggleTheme()">
+                                <i class="fas fa-moon"></i>
+                                <span>Toggle Theme</span>
+                            </a>
+                            <a href="/logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="nav-link">Login</a>
+                    <a href="/register" class="nav-link btn-primary">Register</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <% if (typeof success !== 'undefined' && success) { %>
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span><%= success %></span>
+            <button class="alert-close" onclick="this.parentElement.style.display='none'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    <% } %>
+    
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span><%= error %></span>
+            <button class="alert-close" onclick="this.parentElement.style.display='none'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    <% } %>

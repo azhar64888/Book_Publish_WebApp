@@ -1,0 +1,352 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <img src="<%= user.profilePicture || '/uploads/default-avatar.png' %>" 
+             alt="Profile" class="profile-picture">
+        <h1><%= user.username %></h1>
+        <p class="profile-bio"><%= user.bio || 'No bio yet' %></p>
+        
+        <button class="btn-secondary" onclick="showModal('editProfileModal')">
+            <i class="fas fa-edit"></i> Edit Profile
+        </button>
+    </div>
+
+    <!-- User's Books -->
+    <div class="user-books-section">
+        <h2 style="margin-bottom: 1rem;">My Published Books (<%= books ? books.length : 0 %>)</h2>
+        
+        <% if (books && books.length > 0) { %>
+            <div class="books-grid">
+                <% books.forEach(book => { %>
+                    <% 
+                        // Safely get values
+                        const bookTitle = book.title || 'Untitled Book';
+                        const bookDescription = book.description || 'No description available';
+                        const downloadsCount = book.downloads || 0;
+                        const coverImage = book.coverImage || '/uploads/default-cover.jpg';
+                    %>
+                    
+                    <div class="card book-card">
+                        <!-- Book Cover -->
+                        <div class="book-cover-container">
+                            <img src="<%= coverImage %>" alt="<%= bookTitle %>" class="book-cover" 
+                                 onerror="this.onerror=null; this.src='/uploads/default-cover.jpg';">
+                        </div>
+                        
+                        <!-- Book Info -->
+                        <div class="book-info">
+                            <h3 class="book-title" title="<%= bookTitle %>">
+                                <%= bookTitle.length > 25 ? bookTitle.substring(0, 25) + '...' : bookTitle %>
+                            </h3>
+                            
+                            
+                            <!-- Description -->
+                            <div class="description-container">
+                                <p class="book-description" id="user-desc-<%= book._id %>">
+                                    <%= bookDescription.length > 60 ? 
+                                        bookDescription.substring(0, 60) + '...' : 
+                                        bookDescription %>
+                                </p>
+                                
+                                <% if (bookDescription.length > 60) { %>
+                                    <button class="toggle-description" 
+                                            onclick="toggleUserDescription('<%= book._id %>')"
+                                            id="user-toggle-<%= book._id %>">
+                                        <i class="fas fa-chevron-down"></i> Read More
+                                    </button>
+                                <% } %>
+                            </div>
+                            
+                            <!-- Downloads count -->
+                            <p class="download-count">
+                                <i class="fas fa-download"></i> <%= downloadsCount %> downloads
+                            </p>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="book-actions" style="display: flex; gap: 0.5rem;">
+                            <a href="/editbook/<%= book._id %>" class="btn-secondary" style="flex: 1; text-align: center;">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a href="/deletebook/<%= book._id %>" class="btn-danger" style="flex: 1; text-align: center;">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="no-books" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                <i class="fas fa-book" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 0.5rem;">No books published yet</h3>
+                <p style="margin-bottom: 1.5rem;">Start your publishing journey by creating your first book!</p>
+                <a href="/createbook" class="btn-primary">
+                    <i class="fas fa-plus"></i> Publish First Book
+                </a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Edit Profile Modal with File Upload -->
+<div id="editProfileModal" class="modal">
+    <div class="modal-content">
+        <h2>Edit Profile</h2>
+        
+        <!-- Scrollable Container for Modal Content -->
+        <div class="modal-scrollable-content" style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
+            
+            <!-- Tabs for URL vs File Upload -->
+            <div class="tabs" style="display: flex; margin-bottom: 1rem; border-bottom: 1px solid var(--border);">
+                <button type="button" class="tab-btn active" onclick="showTab('url-tab')">Use URL</button>
+                <button type="button" class="tab-btn" onclick="showTab('upload-tab')">Upload File</button>
+            </div>
+            
+            <!-- Current Profile Preview -->
+            <div class="current-preview" style="text-align: center; margin-bottom: 1rem;">
+                <p style="margin-bottom: 0.5rem; font-weight: bold;">Current Profile Picture:</p>
+                <img src="<%= user.profilePicture || '/uploads/default-avatar.png' %>" 
+                     alt="Current Profile" 
+                     style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent);"
+                     onerror="this.src='/uploads/default-avatar.png'">
+            </div>
+            
+            <!-- URL Tab -->
+            <div id="url-tab" class="tab-content active">
+                <form action="/updateprofile" method="POST">
+                    <div class="form-group">
+                        <label for="bio">Bio (max 50 characters)</label>
+                        <textarea id="bio" name="bio" rows="3" maxlength="50"><%= user.bio || '' %></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profilePictureUrl">Profile Picture URL</label>
+                        <input type="text" id="profilePictureUrl" name="profilePicture" 
+                               value="<%= user.profilePicture || '' %>"
+                               placeholder="Enter image URL">
+                        <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.25rem;">
+                            Enter a direct image URL (e.g., https://example.com/image.jpg)
+                        </small>
+                    </div>
+                    
+                    <!-- Image Preview for URL -->
+                    <div class="url-image-preview" style="margin: 1rem 0; text-align: center;">
+                        <p style="margin-bottom: 0.5rem; font-weight: bold;">URL Image Preview:</p>
+                        <img id="urlImagePreview" src="" alt="URL Preview" 
+                             style="max-width: 150px; max-height: 150px; border-radius: 0.5rem; border: 2px solid var(--border); display: none;">
+                        <p id="urlPreviewText" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem; display: none;">
+                            Live preview will appear here
+                        </p>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- File Upload Tab -->
+            <div id="upload-tab" class="tab-content">
+                <form action="/upload-profile-pic" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="bio2">Bio (max 50 characters)</label>
+                        <textarea id="bio2" name="bio" rows="3" maxlength="50"><%= user.bio || '' %></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profilePictureFile">Upload Profile Picture</label>
+                        <input type="file" id="profilePictureFile" name="profilePictureFile" 
+                               accept=".jpg,.jpeg,.png,.gif,.webp" required>
+                        <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 0.25rem;">
+                            Max size: 5MB. Supported formats: JPG, PNG, GIF, WebP
+                        </small>
+                    </div>
+                    
+                    <!-- Image Preview for File Upload -->
+                    <div class="file-image-preview" style="margin: 1rem 0; text-align: center;">
+                        <p style="margin-bottom: 0.5rem; font-weight: bold;">File Upload Preview:</p>
+                        <img id="fileImagePreview" src="" alt="File Preview" 
+                             style="max-width: 150px; max-height: 150px; border-radius: 0.5rem; border: 2px solid var(--border); display: none;">
+                        <p id="filePreviewText" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                            Select a file to see preview
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Action Buttons (Fixed at bottom, outside scrollable area) -->
+        <div class="modal-actions" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+            <button type="button" class="btn-secondary" onclick="hideModal('editProfileModal')">
+                Cancel
+            </button>
+            <button type="button" class="btn-primary" onclick="submitProfileForm()">
+                Save Changes
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function for user profile description toggle
+    function toggleUserDescription(bookId) {
+        const desc = document.getElementById(`user-desc-${bookId}`);
+        const btn = document.getElementById(`user-toggle-${bookId}`);
+        
+        if (desc && btn) {
+            if (desc.classList.contains('expanded')) {
+                desc.classList.remove('expanded');
+                btn.innerHTML = '<i class="fas fa-chevron-down"></i> Read More';
+            } else {
+                desc.classList.add('expanded');
+                btn.innerHTML = '<i class="fas fa-chevron-up"></i> Read Less';
+            }
+        }
+    }
+
+    // Tab functionality
+    function showTab(tabId) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Remove active class from all buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Show selected tab
+        document.getElementById(tabId).classList.add('active');
+        
+        // Activate clicked button
+        event.target.classList.add('active');
+        
+        // Reset previews
+        resetPreviews();
+    }
+    
+    // Image preview for file upload
+    document.getElementById('profilePictureFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const preview = document.getElementById('fileImagePreview');
+        const previewText = document.getElementById('filePreviewText');
+        
+        if (file) {
+            // Check file size (5MB = 5 * 1024 * 1024 bytes)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                this.value = '';
+                preview.style.display = 'none';
+                previewText.textContent = 'Select a file to see preview';
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                previewText.textContent = 'Preview:';
+            }
+            
+            reader.readAsDataURL(file);
+        } else {
+            preview.style.display = 'none';
+            previewText.textContent = 'Select a file to see preview';
+        }
+    });
+    
+    // Image preview for URL
+    document.getElementById('profilePictureUrl').addEventListener('input', function(e) {
+        const url = e.target.value;
+        const preview = document.getElementById('urlImagePreview');
+        const previewText = document.getElementById('urlPreviewText');
+        
+        if (url && isValidURL(url)) {
+            preview.src = url;
+            preview.style.display = 'block';
+            previewText.style.display = 'block';
+            previewText.textContent = 'Loading preview...';
+            
+            // Check if image loads successfully
+            preview.onload = function() {
+                previewText.textContent = 'Live preview:';
+            };
+            
+            preview.onerror = function() {
+                preview.style.display = 'none';
+                previewText.textContent = 'Cannot load image from this URL';
+            };
+        } else {
+            preview.style.display = 'none';
+            previewText.style.display = url ? 'block' : 'none';
+            previewText.textContent = url ? 'Invalid URL format' : 'Live preview will appear here';
+        }
+    });
+    
+    // Helper function to validate URL
+    function isValidURL(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+    
+    // Reset previews when switching tabs
+    function resetPreviews() {
+        // Hide file upload preview
+        document.getElementById('fileImagePreview').style.display = 'none';
+        document.getElementById('filePreviewText').textContent = 'Select a file to see preview';
+        
+        // Hide URL preview
+        document.getElementById('urlImagePreview').style.display = 'none';
+        document.getElementById('urlPreviewText').style.display = 'none';
+        document.getElementById('urlPreviewText').textContent = 'Live preview will appear here';
+    }
+    
+    // Submit the appropriate form based on active tab
+    function submitProfileForm() {
+        const activeTab = document.querySelector('.tab-content.active');
+        
+        if (activeTab.id === 'url-tab') {
+            // Submit URL form
+            const urlForm = activeTab.querySelector('form');
+            if (urlForm) {
+                urlForm.submit();
+            }
+        } else if (activeTab.id === 'upload-tab') {
+            // Submit file upload form
+            const fileForm = activeTab.querySelector('form');
+            const fileInput = document.getElementById('profilePictureFile');
+            
+            if (fileInput && fileInput.files.length === 0) {
+                alert('Please select a file to upload');
+                return;
+            }
+            
+            if (fileForm) {
+                fileForm.submit();
+            }
+        }
+    }
+    
+    // Modal functions
+    function showModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+        resetPreviews();
+    }
+    
+    function hideModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+</script>
+
+<%- include('partials/footer') %>

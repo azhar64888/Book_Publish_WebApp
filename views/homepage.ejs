@@ -1,0 +1,82 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1>Welcome, <%= user.username %>!</h1>
+        <p>Discover amazing books from authors around the world</p>
+    </div>
+
+
+    <!-- Books Grid -->
+    <div class="books-grid">
+        <% if (books && books.length > 0) { %>
+            <% books.forEach(book => { %>
+                <% 
+                    // Safely get values
+                    const bookTitle = book.title || 'Untitled Book';
+                    const authorName = book.author && book.author.username ? book.author.username : 'Unknown Author';
+                    const bookDescription = book.description || 'No description available';
+                    const downloadsCount = book.downloads || 0;
+                    const coverImage = book.coverImage || '/uploads/default-cover.jpg';
+                %>
+                
+                <div class="card book-card">
+                    <!-- Book Cover -->
+                    <div class="book-cover-container">
+                        <img src="<%= coverImage %>" alt="<%= bookTitle %>" class="book-cover" 
+                             onerror="this.onerror=null; this.src='/uploads/default-cover.jpg';">
+                    </div>
+                    
+                    <!-- Book Info -->
+                    <div class="book-info">
+                        <h3 class="book-title" title="<%= bookTitle %>">
+                            <%= bookTitle.length > 30 ? bookTitle.substring(0, 30) + '...' : bookTitle %>
+                        </h3>
+                        
+                        <p class="book-author" title="By <%= authorName %>">
+                            By <%= authorName.length > 25 ? authorName.substring(0, 25) + '...' : authorName %>
+                        </p>
+                        
+                        <!-- Description -->
+                        <div class="description-container">
+                            <p class="book-description" id="desc-<%= book._id %>">
+                                <%= bookDescription.length > 80 ? 
+                                    bookDescription.substring(0, 80) + '...' : 
+                                    bookDescription %>
+                            </p>
+                            
+                            <% if (bookDescription.length > 80) { %>
+                                <button class="toggle-description" 
+                                        onclick="toggleDescription('<%= book._id %>')"
+                                        id="toggle-<%= book._id %>">
+                                    <i class="fas fa-chevron-down"></i> Read More
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                    
+                    <!-- Download Button -->
+                    <div class="book-actions">
+                        <a href="/download/<%= book._id %>" class="btn-primary download-btn" 
+                           title="Download <%= bookTitle %>">
+                            <i class="fas fa-download"></i>
+                            <span>Download (<%= downloadsCount %>)</span>
+                        </a>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="no-books">
+                <i class="fas fa-book-open"></i>
+                <h3>No books found</h3>
+                <p>Be the first to publish a book!</p>
+                <a href="/createbook" class="btn-primary">
+                    <i class="fas fa-plus"></i> Publish First Book
+                </a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

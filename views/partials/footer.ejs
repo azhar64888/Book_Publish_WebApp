@@ -1,0 +1,47 @@
+    <footer class="footer">
+    </footer>
+
+    <script>
+        // Modal functionality
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'block';
+            }
+        }
+        
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let modal of modals) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+        
+        // Expand description
+        function toggleDescription(bookId) {
+            const desc = document.getElementById(`desc-${bookId}`);
+            const btn = document.getElementById(`toggle-${bookId}`);
+            
+            if (desc && btn) {
+                if (desc.classList.contains('expanded')) {
+                    desc.classList.remove('expanded');
+                    btn.innerHTML = '<i class="fas fa-chevron-down"></i> Read More';
+                } else {
+                    desc.classList.add('expanded');
+                    btn.innerHTML = '<i class="fas fa-chevron-up"></i> Read Less';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <div class="form-container">
+        <h1 style="text-align: center; margin-bottom: 2rem; color: var(--error);">
+            Delete Book
+        </h1>
+        
+        <div class="book-preview" style="text-align: center; margin-bottom: 2rem;">
+            <img src="<%= book.coverImage %>" alt="<%= book.title %>" 
+                 style="width: 200px; height: 300px; object-fit: cover; border-radius: 0.5rem;">
+            <h2 style="margin: 1rem 0;"><%= book.title %></h2>
+            <p style="color: var(--text-secondary);">By <%= book.author.username %></p>
+            <p style="margin: 1rem 0;"><%= book.description.substring(0, 100) %>...</p>
+        </div>
+        
+        <div class="warning-card" style="background-color: rgba(239, 68, 68, 0.1); 
+                                      padding: 1.5rem; border-radius: 0.5rem; 
+                                      border: 1px solid var(--error); margin-bottom: 2rem;">
+            <h3 style="color: var(--error); margin-bottom: 0.5rem;">
+                <i class="fas fa-exclamation-triangle"></i> Warning
+            </h3>
+            <p>This action cannot be undone. All data associated with this book will be permanently deleted.</p>
+        </div>
+        
+        <form action="/deletebook/<%= book._id %>" method="POST">
+            <div class="form-actions">
+                <a href="/books/userprofile" class="btn-secondary">Cancel</a>
+                <button type="button" class="btn-danger" onclick="showModal('confirmModal')">
+                    Delete Book
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <h2 style="margin-bottom: 1rem; color: var(--error);">Confirm Deletion</h2>
+        <p>Are you absolutely sure you want to delete "<%= book.title %>"?</p>
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="hideModal('confirmModal')">Cancel</button>
+            <button class="btn-danger" onclick="document.querySelector('form').submit()">
+                Yes, Delete Permanently
+            </button>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
